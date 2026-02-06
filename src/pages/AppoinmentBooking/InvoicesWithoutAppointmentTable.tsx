@@ -211,17 +211,17 @@ export const InvoicesWithoutAppointmentTable = () => {
 
       </div>
 
-  {showEditPopup && selectedId && (
-  <EditInvoiceWithoutAppointmentPopup
-    isOpen={showEditPopup}
-    invoiceId={selectedId}
-    onClose={() => {
-      setShowEditPopup(false);
-      setSelectedId(null);
-    }}
-    refreshData={fetchInvoices}
-  />
-)}
+      {showEditPopup && selectedId && (
+        <EditInvoiceWithoutAppointmentPopup
+          isOpen={showEditPopup}
+          invoiceId={selectedId}
+          onClose={() => {
+            setShowEditPopup(false);
+            setSelectedId(null);
+          }}
+          refreshData={fetchInvoices}
+        />
+      )}
 
 
 

@@ -22,6 +22,7 @@ import { AddInvoiceWithoutAppointmentPopup } from "./AddInvoiceWithoutAppointmen
 import { AppointmentBooking } from "../../commonapicall/AppointmentBookingapis/AppointmentBookingapis";
 import { HiOutlineCalendar, HiOutlineDocumentText, HiOutlineDocumentAdd } from "react-icons/hi";
 import { InvoicesWithoutAppointmentTable } from "./InvoicesWithoutAppointmentTable";
+import { InvoicesTable } from "./InvoicelistTable";
 
 interface Appointment {
   id: number;
@@ -45,22 +46,18 @@ export const AppoinmentBookingTable = () => {
   const [data, setData] = useState<Appointment[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const [totalCount, setTotalCount] = useState(0);
-
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showMailerPopup, setShowMailerPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-
-
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showAddInvoicePopup, setShowAddInvoicePopup] = useState(false);
   const [showAddInvoiceWithoutApptPopup, setShowAddInvoiceWithoutApptPopup] = useState(false);
-
+  const [invoiceRefreshKey, setInvoiceRefreshKey] = useState(0);
 
   /* ---------------- FETCH DATA ---------------- */
   const fetchData = async () => {
@@ -244,114 +241,119 @@ export const AppoinmentBookingTable = () => {
 
         {/* ================= TABLE CARD ================= */}
         {activeTab === "appointments" && (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-main text-white">
-                <tr>
-                  <th className="px-6 py-3 text-left">ID</th>
-                  <th className="px-6 py-3 text-left">CAR</th>
-                  <th className="px-6 py-3 text-left">CUSTOMER NAME</th>
-                  <th className="px-6 py-3 text-left">DATE</th>
-                  <th className="px-6 py-3 text-left">PRICE (£)</th>
-                  <th className="px-6 py-3 text-center">ACTION</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {loading ? (
-                  <TableShimmer columnCount={6} />
-                ) : data.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-main text-white">
                   <tr>
-                    <td colSpan={6} className="py-10 text-center text-gray-500">
-                      No Records Found
-                    </td>
+                    <th className="px-6 py-3 text-left">ID</th>
+                    <th className="px-6 py-3 text-left">CAR</th>
+                    <th className="px-6 py-3 text-left">CUSTOMER NAME</th>
+                    <th className="px-6 py-3 text-left">DATE</th>
+                    <th className="px-6 py-3 text-left">PRICE (£)</th>
+                    <th className="px-6 py-3 text-center">ACTION</th>
                   </tr>
-                ) : (
-                  data.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b hover:bg-gray-50 cursor-pointer"
-                      onClick={() => {
-                        setSelectedId(item.id);
-                        setShowEditPopup(true);
-                      }}
-                    >
-                      <td className="px-6 py-4">{item.id}</td>
-                      <td className="px-6 py-4">
-                        {item.registration_number}
-                      </td>
-                      <td className="px-6 py-4">
-                        {item.customer_name}
-                      </td>
-                      <td className="px-6 py-4 text-gray-500">
-                        {item.date}
-                      </td>
-                      <td className="px-6 py-4">
-                        {item.total_estimate}
-                      </td>
+                </thead>
 
-                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-center gap-2">
-                          <ActionBtn
-                            icon={<MdEmail />}
-                            onClick={() => {
-                              setSelectedId(item.id);
-                              setShowMailerPopup(true);
-                            }}
-                          />
-                          <ActionBtn
-                            icon={<MdDownload />}
-                            onClick={(e) =>
-                              handlePDF(item.id, "quote", e)
-                            }
-                          />
-                          <ActionBtn
-                            icon={<MdRemoveRedEye />}
-                            onClick={() => {
-                              setSelectedId(item.id);
-                              setShowEditPopup(true);
-                            }}
-                          />
-                          <ActionBtn
-                            icon={<MdDelete />}
-                            onClick={() => {
-                              setSelectedId(item.id);
-                              setShowDeletePopup(true);
-                            }}
-                          />
-                        </div>
+                <tbody>
+                  {loading ? (
+                    <TableShimmer columnCount={6} />
+                  ) : data.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-10 text-center text-gray-500">
+                        No Records Found
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    data.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="border-b hover:bg-gray-50 cursor-pointer"
+                        onClick={() => {
+                          setSelectedId(item.id);
+                          setShowEditPopup(true);
+                        }}
+                      >
+                        <td className="px-6 py-4">{item.id}</td>
+                        <td className="px-6 py-4">
+                          {item.registration_number}
+                        </td>
+                        <td className="px-6 py-4">
+                          {item.customer_name}
+                        </td>
+                        <td className="px-6 py-4 text-gray-500">
+                          {item.date}
+                        </td>
+                        <td className="px-6 py-4">
+                          {item.total_estimate}
+                        </td>
 
-          {/* Footer */}
-          <div className="px-6 py-4 flex justify-between items-center">
-            <p className="text-sm text-gray-500">
-              Showing 1 to {data.length} of {totalCount} results
-            </p>
+                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex justify-center gap-2">
+                            <ActionBtn
+                              icon={<MdEmail />}
+                              onClick={() => {
+                                setSelectedId(item.id);
+                                setShowMailerPopup(true);
+                              }}
+                            />
+                            <ActionBtn
+                              icon={<MdDownload />}
+                              onClick={(e) =>
+                                handlePDF(item.id, "quote", e)
+                              }
+                            />
+                            <ActionBtn
+                              icon={<MdRemoveRedEye />}
+                              onClick={() => {
+                                setSelectedId(item.id);
+                                setShowEditPopup(true);
+                              }}
+                            />
+                            <ActionBtn
+                              icon={<MdDelete />}
+                              onClick={() => {
+                                setSelectedId(item.id);
+                                setShowDeletePopup(true);
+                              }}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-            <Pagination
-              currentPage={currentPage}
-              totalItems={totalCount}
-              itemsPerPage={itemsPerPage}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={(v) => {
-                setItemsPerPage(v);
-                setCurrentPage(1);
-              }}
-            />
+            {/* Footer */}
+            <div className="px-6 py-4 flex justify-between items-center">
+              <p className="text-sm text-gray-500">
+                Showing 1 to {data.length} of {totalCount} results
+              </p>
+
+              <Pagination
+                currentPage={currentPage}
+                totalItems={totalCount}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onItemsPerPageChange={(v) => {
+                  setItemsPerPage(v);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
           </div>
-        </div>
+        )}
+        {activeTab === "invoices" && (
+          <InvoicesTable
+            search={search}
+            refreshKey={invoiceRefreshKey} />
         )}
 
-{activeTab === "invoicesWithoutAppointments" && (
-  <InvoicesWithoutAppointmentTable />
-)}
+        {activeTab === "invoicesWithoutAppointments" && (
+          <InvoicesWithoutAppointmentTable />
+        )}
 
       </div>
 
@@ -393,7 +395,10 @@ export const AppoinmentBookingTable = () => {
       {showAddInvoicePopup && (
         <AddInvoicePopup
           onClose={() => setShowAddInvoicePopup(false)}
-          refreshData={fetchData}
+          refreshData={() => {
+            setActiveTab("invoices"); // stay on invoice tab
+            setInvoiceRefreshKey(prev => prev + 1); // refresh invoice table
+          }}
         />
       )}
 

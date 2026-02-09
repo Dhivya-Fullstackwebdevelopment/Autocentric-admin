@@ -66,7 +66,7 @@ export const InvoicesTable = ({ search, refreshKey }: { search: string, refreshK
 
         try {
             const res = await apiAxios.get(
-                `/api/invoice_new/${id}/invoice_pdf`,
+                `/api/appointments/${id}/invoice_pdf`,
                 { responseType: "blob" }
             );
 
